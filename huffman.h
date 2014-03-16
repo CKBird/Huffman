@@ -72,8 +72,10 @@ public:
 
 private:
 	minHeap* Heap;
-	treeNode codeBook[257];
+	int frequencies[258];
 	treeNode finalNode;
 	string tempString;
-	
+	string encodings[258];
+	string compressed;
+	//int encodedMessage[100];
 };	

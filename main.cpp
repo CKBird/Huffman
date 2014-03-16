@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	huffman Huffman;
-	
+	//string encodings[258];
 	if(argc < 2)// if not -d 
 	{
 		Huffman.compress();

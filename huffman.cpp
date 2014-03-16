@@ -8,7 +8,7 @@
 
 #include<iostream>
 #include<string>
-#include <iomanip>
+#include<cmath>
 #include "huffman.h"
 
 using namespace std;
@@ -16,6 +16,10 @@ using namespace std;
 huffman::huffman()
 {
 	Heap = new minHeap(257);
+	for(int i = 0; i < 258; i++)
+	{
+		encodings[i] = "empty";
+	}	
 } //Constructor
 
 huffman::~huffman()
@@ -25,11 +29,7 @@ huffman::~huffman()
 
 void huffman::compress()
 {
-	readUncom();
-	//quickSort(listOfEight, 0, QPosition);
-	//When Given uncompressed data, compress it, then spit it out compressed
-	//Given sequence of 8-bit chars, no more than 2^32-1
-	
+	readUncom();	
 }
 
 void huffman::readUncom() //READS IN NORMAL CHARACTERS AND GETS FREQUENCIES
@@ -66,6 +66,7 @@ void huffman::readUncom() //READS IN NORMAL CHARACTERS AND GETS FREQUENCIES
 	{
 		//cout << "Element: " << i << " " << "Value: " << elements[i].getEightBit() << " Freq: " << elements[i].getFreq() << endl;
 		Heap->push(elements[i]);
+		frequencies[elements[i].getEightBit()] = elements[i].getFreq();
 	}
 	
 	makeHuff();
@@ -141,9 +142,9 @@ void huffman::makeCodeBook(treeNode* root)
 	{
 		root->setString(tempString);
 		
-		cout << setw(10) << root->getString();
-		cout << " char: " << root->getEightBit() << endl; // " | freq: " << root->getFreq() << endl;
-		
+		encodings[root->getEightBit()] = root->getString();
+		// cout << setw(10) << root->getString();
+		// cout << " char: " << root->getEightBit() << endl; // " | freq: " << root->getFreq() << endl;
 	}
 	
 	tempString = tempString.substr(0, tempString.size()-1);
@@ -152,8 +153,103 @@ void huffman::makeCodeBook(treeNode* root)
 
 void huffman::buildInt()
 {
-	cout << "I Like Cake!" << endl;
+	// for(int i = 0; i < 258; i++)
+	// {
+		// if(encodings[i] != "empty")
+		// {
+			// cout << "Code: " << encodings[i] << endl;
+		// }
+	// } //FUCKING MIRACLES; I CAN FEEL IT IN THE AIR
+	//I HATE MY LIFE
+	
 	//We have array of encodings stored in encodings;
+	//Go through input file again, for each char, get encoding, store into int
+	//If not 32 bits, get next and continue, if 32 bits
+	//get new int out, start with that one
+	//Print HUFFMA5
+	//Print array of integers
+	//party
+	cin.clear();
+	cin.seekg(0, cin.beg);
+	
+	unsigned char pie;
+	unsigned int pumpkin;
+	//int bitCount = 0;
+	//int i = 0;
+	while(cin >> pie)
+	{		
+		if(cin.eof())
+		{
+			break;
+		}
+		pumpkin = pie;
+		if(pumpkin > 255)
+		{
+			continue;
+		}
+		compressed += encodings[pie];
+	}
+	
+	cout << "HUFFMA5" << '\0';
+	//Now cout frequencies as 4-byte little endian form
+	unsigned char digits[4];
+	for(int i = 0; i < 256; i++)
+	{
+		if(encodings[i] == "empty")
+		{
+			cout << '\0' << '\0' << '\0' << '\0';
+			continue;
+		}
+		else
+		{
+			digits[0] = (frequencies[i] >> 24) & 0xFF;
+			digits[1] = (frequencies[i] >> 16) & 0xFF;
+			digits[2] = (frequencies[i] >> 8) & 0xFF;
+			digits[3] = (frequencies[i]) & 0xFF;
+			cout << digits[3] << digits[2] << digits[1] << digits[0];
+		}
+	}	
+	
+	int i = 0;
+	int k = 0;
+	int l = (signed)compressed.length() / 8;
+	int m = (signed)compressed.length() % 8;
+	//cout << "Length: " << (signed)compressed.length() << " l: " << l << " m:" << m << endl;
+	
+	while(i < (signed)compressed.length())
+	{
+		unsigned int temp;
+		for(int j = 7; j >= 0; j--)
+		{
+			if(k < l)
+			{
+				i++;
+				temp <<= 1;
+				temp += compressed[j+(k*8)] - '0';
+			}
+			else
+			{
+				for(int n = 0; n < m; n++)
+				{
+					i++;
+					temp <<= 1;
+				}
+				for(int o = 0; o < 8-m; o++)
+				{
+					i++;
+					temp <<= 1;
+					temp += compressed[j+(k*8)] - '0';
+				}
+			}
+		}
+		cout << (unsigned char) temp;
+		k++;
+	}
+	
+	
+	
+	//If it prints this, I am the best person in the world
+	//cout << "Done Bitch" << endl;	
 }
 
 void huffman::decompress()
